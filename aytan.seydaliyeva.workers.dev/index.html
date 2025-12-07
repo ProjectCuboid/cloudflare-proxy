@@ -1,11 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Worker Page</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aytan Seydaliyeva</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
+<script src="https://kit.fontawesome.com/b998bf4b98.js" crossorigin="anonymous"></script>
+<style>
+    html, body { height: 100%; display: flex; align-items: center; justify-content: center; background: #111; color: #fff; }
+    body { flex-direction: column; font-family: "Montserrat", sans-serif; overflow: hidden; }
+
+    .gothic { font-family: 'Special Gothic Expanded One', sans-serif; font-size: clamp(3rem, 10vw, 10rem); text-align: center; line-height: 1.2; }
+
+    button {
+        border-radius: 5px;
+        background-color: #222;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10;
+        font-family: monospace;
+        transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:hover { transform: translateY(-3px); box-shadow:0px 5px 0px 0px #111; }
+    button:active { transform: translateY(2px); box-shadow:none; }
+</style>
 </head>
 <body>
-  <h1>Welcome!</h1>
-  <p>This is served from Cloudflare Worker.</p>
- </body>
+
+<button id="languageToggle"><i class="fa-solid fa-language"></i> TR</button>
+<h1 id="typewriter" class="gothic"></h1>
+
+<script>
+const typewriter = document.getElementById('typewriter');
+const languageToggle = document.getElementById('languageToggle');
+
+const lines_en = ["Because we care.", "Care that counts.", "Because you matter."];
+const lines_tr = [
+    "Çünkü sağlığınız bizim önceliğimiz.",
+    "Uzman bakım, içten yaklaşım.",
+    "İyi olmanız, görevimiz.",
+    "Her adımda hassasiyetle.",
+    "Önemli olan, gerçekten önem vermek."
+];
+
+let lines = lines_en;
+
+let lineIndex = 0;
+let charIndex = 0;
+
+const typingSpeed = 90;
+const spaceSpeed = 50;
+const erasingSpeed = 60;
+const delayBetweenLines = 2000;
+const speedvariety = 20;
+
+// main typewriter loop
+function typeLine() {
+    if (charIndex < lines[lineIndex].length) {
+        let currentChar = lines[lineIndex].charAt(charIndex);
+        charIndex++;
+
+        let randomOffset = Math.floor(Math.random() * speedvariety * 2) - speedvariety;
+        let speed = (currentChar === ' ' ? spaceSpeed : typingSpeed) + randomOffset;
+
+        typewriter.textContent = lines[lineIndex].substring(0, charIndex) + "|"; // solid cursor
+        setTimeout(typeLine, speed);
+    } else {
+        blinkCursor(delayBetweenLines, eraseLine);
+    }
+}
+
+function eraseLine() {
+    if (charIndex > 0) {
+        charIndex--;
+        typewriter.textContent = lines[lineIndex].substring(0, charIndex) + "|"; // solid cursor
+        setTimeout(eraseLine, erasingSpeed);
+    } else {
+        lineIndex = (lineIndex + 1) % lines.length;
+        setTimeout(typeLine, typingSpeed);
+    }
+}
+
+// blink cursor only during pause
+function blinkCursor(duration, callback) {
+    let visible = true;
+    const interval = setInterval(() => {
+        visible = !visible;
+        typewriter.textContent = lines[lineIndex] + (visible ? "|" : "");
+    }, 500);
+
+    setTimeout(() => {
+        clearInterval(interval);
+        typewriter.textContent = lines[lineIndex]; // remove cursor after blink
+        if (callback) callback();
+    }, duration);
+}
+
+// language toggle
+languageToggle.addEventListener('click', () => {
+    if (lines === lines_en) {
+        lines = lines_tr;
+        languageToggle.innerHTML = '<i class="fa-solid fa-language"></i> EN';
+    } else {
+        lines = lines_en;
+        languageToggle.innerHTML = '<i class="fa-solid fa-language"></i> TR';
+    }
+    lineIndex = 0;
+    charIndex = 0;
+    typewriter.textContent = "";
+});
+
+// start typing
+typeLine();
+</script>
+
+</body>
 </html>
